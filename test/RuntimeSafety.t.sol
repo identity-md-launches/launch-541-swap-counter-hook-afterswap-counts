@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.26;
+
+import {HookFixture} from "./helpers/HookFixture.sol";
+import {SwapCounterToken} from "../src/SwapCounterToken.sol";
+
+contract RuntimeSafetyTest is HookFixture {
+    function test_launchBytecodeHasNoEscapeHatches() public {
+        _check(address(hook).code);
+        _check(address(new SwapCounterToken()).code);
+    }
+
+    function _check(bytes memory code) private pure {
+        assertGt(code.length, 0);
+        assertLe(code.length, 24_576);
+        for (uint256 i; i < code.length; ++i) {
+            uint8 op = uint8(code[i]);
+            if (op >= 0x60 && op <= 0x7f) {
+                i += op - 0x5f;
+            } else {
+                assertTrue(op != 0xff && op != 0xf4 && op != 0xf2, "forbidden runtime opcode");
+            }
+        }
+    }
+}
