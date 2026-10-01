@@ -1,0 +1,26 @@
+{
+  "kind": "univ4_hook",
+  "hook": {
+    "contract": "SwapCounterHook",
+    "constructorArgs": [
+      "0x000000000004444c5dc75cb358380d2e3de08a90"
+    ],
+    "permissions": [
+      "beforeInitialize",
+      "afterSwap"
+    ]
+  },
+  "token": {
+    "contract": "SwapCounterToken",
+    "name": "Swap Counter",
+    "symbol": "SWPC",
+    "decimals": 18
+  },
+  "pool": {
+    "pairedCurrency": "0x0000000000000000000000000000000000000000",
+    "fee": 3000,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336"
+  },
+  "notes": "SwapCounterHook inherits BaseHook. Its sole constructor argument is IPoolManager manager; it requires deployed code at that address and matching hook address permission bits. Only beforeInitialize and afterSwap are enabled (flags 8256 / 0x2040); all return-delta permissions are false. Both callbacks accept calls only from the immutable PoolManager. beforeInitialize returns its selector without changing state or restricting pool parameters. Each successful afterSwap increments swapCount(sender) and totalSwaps(), emits SwapCounted(address indexed sender, bytes32 indexed poolId, uint256 senderCount, uint256 totalCount) with the updated counts, and returns the afterSwap selector with int128(0). It makes no external calls and never changes swap amounts or fees. Both counts are public views aggregated across all pools using this hook. The sender is PoolManager's immediate swap caller, usually a router, not necessarily an end user. Reverted transactions roll back counts and events. SwapCounterToken is an ERC-20 with no constructor arguments. Deployment-input assumptions, because no target manager or launch price was supplied: the constructor address is the Ethereum mainnet PoolManager documented at https://developers.uniswap.org/docs/protocols/v4/deployments; this manifest does not select the deployment queue. The pool pairs native ETH (currency0, zero address) with SwapCounterToken (currency1), using static fee 3000 (0.30%), tick spacing 60, and initial sqrtPriceX96 = 2^96, representing 1 token minor unit per wei, or 1 SWPC per ETH with 18 decimals. The fee, spacing, and price adopt the repository's test values as explicit configuration assumptions. The hook can serve other pools; these pool fields do not imply an on-chain pool restriction. The initialization callback requires hook code to exist before pool initialization; deployment and initialization are intended to be atomic. This is a technical description, not deployment authorization or launch policy."
+}
